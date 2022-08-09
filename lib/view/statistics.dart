@@ -29,6 +29,7 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
   String property2 = ProjectText().DefaultProperty2;
   String dropDownItem = ProjectText().DefaultDropDownText;
   String timeInterval = DefaultTimeInterval;
+  String graphType = DefaultGraphType;
   
 
 
@@ -79,15 +80,18 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
         setState(() {
           if (ButtonName == ProjectButtonName().DayButton) {
             CharDataDay = CreateChartDataDay(StatisticsData,property,property2);
-            _Graph = DrawGraphDaySum(CharDataDay: CharDataDay,Property:property,GraphType : 'Günlük' );
+            graphType = 'Günlük';
+            _Graph = DrawGraphDaySum(CharDataDay: CharDataDay,Property:property,GraphType : graphType );
           }
           else if (ButtonName == ProjectButtonName().NowButton){
             CharDataNow = CreateChartDataNow(StatisticsData,property,property2);
-            _Graph = DrawGraphNow(CharDataNow: CharDataNow,Property:property,GraphType : 'Anlık' );
+            graphType = 'Anlık';
+            _Graph = DrawGraphNow(CharDataNow: CharDataNow,Property:property,GraphType : graphType );
           }
           else if(ButtonName == ProjectButtonName().MonthButton){
             CharDataMonth = CreateChartDataMonth(StatisticsData,property,property2);
-            _Graph = DrawGraphDaySumMonth(CharDataMonth: CharDataMonth,Property:property,GraphType : 'Aylık' );
+            graphType = 'Aylık';
+            _Graph = DrawGraphDaySumMonth(CharDataMonth: CharDataMonth,Property:property,GraphType : graphType );
           }
         });
   }
@@ -98,7 +102,7 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
           property2 = DropDownProperty[DropDownItem]['propertyChild'];
           StatisticsData = FilterTimeInterval(timeInterval);
           CharDataNow = CreateChartDataNow( StatisticsData,property,property2);
-          _Graph = DrawGraphNow(CharDataNow: CharDataNow,Property: property,GraphType: 'Anlık',);
+          _Graph = DrawGraphNow(CharDataNow: CharDataNow,Property: property,GraphType: DefaultGraphType,);
         });
   }
 
@@ -161,12 +165,12 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
           PopupMenuItem(value: 'Last1Month',child: Text(TimeInterval["Last1Month"]["Name"])),
           PopupMenuItem(value: 'Last1Week',child: Text(TimeInterval["Last1Week"]["Name"]))
           ]),
-          onSelected: _UpdateTimeInterval,)];
+          onSelected: _updateTimeInterval,)];
   }
 
-  void _UpdateTimeInterval(String SelectedTime) {
+  void _updateTimeInterval(String selectedTime) {
           setState(() {
-            timeInterval = SelectedTime;
+            timeInterval = selectedTime;
             StatisticsData = FilterTimeInterval(timeInterval);
             CharDataNow = CreateChartDataNow(StatisticsData,property,property2);
              _Graph = DrawGraphNow(CharDataNow: CharDataNow,Property: property,GraphType: 'Anlık',);
@@ -200,7 +204,7 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
           );
   }
 
-  Padding _grafphbutton(String ButtonText, String ButtonOperation) => Padding(
+  Padding _grafphbutton(String buttonText, String buttonOperation) => Padding(
     padding:  EdgeInsets.all(buttonPadding),
     child: ElevatedButton(
       style : ElevatedButton.styleFrom(
@@ -209,8 +213,8 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
           borderRadius:  BorderRadius.circular(buttonBorderRadius),
         ),
         ),
-      onPressed:() => _changeGraph(ButtonOperation) , 
-      child: Text(ButtonText)),
+      onPressed:() => _changeGraph(buttonOperation) , 
+      child: Text(buttonText)),
   );
 
 }
