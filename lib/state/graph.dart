@@ -46,8 +46,7 @@ class DrawGraphNow extends StatelessWidget {
             xValueMapper: (ChartDataNow data, _) => data.dateTime, 
             yValueMapper: (ChartDataNow data, _) => data.count,
             enableTooltip: true,
-            
-           
+            markerSettings: MarkerSettings(isVisible: CharDataNow.length < 10 ? true:false)           
       )]
       ,
       ),
@@ -96,8 +95,8 @@ class DrawGraphDaySum extends StatelessWidget {
             dataSource: CharDataDay, 
             xValueMapper: (ChartDataDay data, _) => data.day, 
             yValueMapper: (ChartDataDay data, _) => data.count,
-            enableTooltip: true
-               
+            enableTooltip: true,
+            markerSettings: MarkerSettings(isVisible: CharDataDay.length < 10 ? true:false)    
       )]
       ,
       ),

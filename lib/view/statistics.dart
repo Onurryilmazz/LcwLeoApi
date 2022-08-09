@@ -1,17 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:statistics_project/models/statistic_model.dart';
-import 'package:statistics_project/state/data/create_data.dart';
 import 'package:statistics_project/state/graph_class.dart';
 
 import '../controller/controller.dart';
 import '../languages/languages.dart';
-import '../services/services.dart';
 import '../state/graph.dart';
-import 'package:http/http.dart' as http;
 
 class StatisticsAnalysis extends StatefulWidget {
   const StatisticsAnalysis({Key? key}) : super(key: key);
@@ -22,7 +18,8 @@ class StatisticsAnalysis extends StatefulWidget {
 
 class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
 
-  late final List<Statistics> fakeStatisticsData = [];
+  List<Statistics> StatisticsData = [];
+  List<Statistics> Data = [];
   late Widget? _Graph = const _WelcomeWidget();
   late List<ChartDataNow> CharDataNow = [];
   late List<ChartDataDay> CharDataDay = [];
@@ -30,6 +27,8 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
   String property = ProjectText().DefaultProperty;
   String property2 = ProjectText().DefaultProperty2;
   String dropDownItem = ProjectText().DefaultDropDownText;
+  String timeInterval = 'allTime';
+  
 
 
 
@@ -37,18 +36,36 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
   var response = await Dio().get("https://mocki.io/v1/be763439-3c7c-4c72-b0dd-5c3d0efd1c18");
   var data = response.data.map((e) => Statistics.fromJson(e)).toList();
   for (var element in data) {
-    fakeStatisticsData.add(element);
+    Data.add(element);
   }
-}
+  }
+
+
+  List<Statistics> FilterTimeInterval(String timeInterval){
+    DateTime NowDate = DateTime.now();
+    List<Statistics> StatisticsDataWithTimeInterval = [];
+
+    if (timeInterval == "allTime"){
+      return Data;
+    }
+
+    for (var element in Data) {
+      var elementDate = element.dateTime?? DateTime.now().toString();
+      if (NowDate.difference(DateTime.parse(elementDate)).inDays < TimeInterval[timeInterval]["TimeInterval"]) {
+        StatisticsDataWithTimeInterval.add(element);
+      }
+    }
+    return StatisticsDataWithTimeInterval;
+  }
 
 
   @override
   void initState() {
-    // fakeStatisticsData = CreateData().CreateDataValue();
     fetchStudentItem();
+    StatisticsData = Data;
     Timer(const Duration(seconds:2),(){
           setState(() {
-            CharDataNow = CreateChartDataNow(fakeStatisticsData,property,property2);
+            CharDataNow = CreateChartDataNow(StatisticsData,property,property2);
             _Graph = DrawGraphNow(CharDataNow: CharDataNow,Property: property,GraphType:'Anlık');
           });
     });
@@ -59,15 +76,15 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
   void _changeGraph(String ButtonName){
         setState(() {
           if (ButtonName == ProjectButtonName().DayButton) {
-            CharDataDay = CreateChartDataDay(fakeStatisticsData,property,property2);
+            CharDataDay = CreateChartDataDay(StatisticsData,property,property2);
             _Graph = DrawGraphDaySum(CharDataDay: CharDataDay,Property:property,GraphType : 'Günlük' );
           }
           else if (ButtonName == ProjectButtonName().NowButton){
-            CharDataNow = CreateChartDataNow(fakeStatisticsData,property,property2);
+            CharDataNow = CreateChartDataNow(StatisticsData,property,property2);
             _Graph = DrawGraphNow(CharDataNow: CharDataNow,Property:property,GraphType : 'Anlık' );
           }
           else if(ButtonName == ProjectButtonName().MonthButton){
-            CharDataMonth = CreateChartDataMonth(fakeStatisticsData,property,property2);
+            CharDataMonth = CreateChartDataMonth(StatisticsData,property,property2);
             _Graph = DrawGraphDaySumMonth(CharDataMonth: CharDataMonth,Property:property,GraphType : 'Aylık' );
           }
         });
@@ -77,7 +94,8 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
         setState(() {
           property = DropDownProperty[DropDownItem]['propertyFather'];
           property2 = DropDownProperty[DropDownItem]['propertyChild'];
-          CharDataNow = CreateChartDataNow(fakeStatisticsData,property,property2);
+          StatisticsData = FilterTimeInterval(timeInterval);
+          CharDataNow = CreateChartDataNow( StatisticsData,property,property2);
           _Graph = DrawGraphNow(CharDataNow: CharDataNow,Property: property,GraphType: 'Anlık',);
         });
   }
@@ -86,14 +104,20 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title:Text(ProjectText().AppBarTitle),centerTitle: true,),
+      appBar: AppBar(
+        title:Text(ProjectText().AppBarTitle),centerTitle: true,
+        actions: _TimeIntervalPopUpMenu
+        ),
       body: Column(
         children: [
           Expanded(child: DropDownList()),
           Expanded(
             flex: 10,
             child: Padding(
-              padding: const EdgeInsets.only(top: 10,left:10,right: 10),
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).size.width * 0.017,
+                left:MediaQuery.of(context).size.width * 0.02,
+                right: MediaQuery.of(context).size.width * 0.02),
               child: Card(
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 child: _Graph?? Text(ProjectText().GraphErrorMessage) 
@@ -116,6 +140,35 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
     );
   }
 
+  List<Widget> get _TimeIntervalPopUpMenu {
+    return <Widget>[PopupMenuButton(
+        icon: const Icon(Icons.update_outlined),
+        iconSize: 30,
+        color: Colors.blue[50],
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+               Radius.circular(20.0),
+          ),
+        ),
+        itemBuilder: 
+        ((context) => [
+          PopupMenuItem(value: 'allTime',child: Text(TimeInterval["AllTime"]),),
+          PopupMenuItem(value: 'LastYear',child: Text(TimeInterval["LastYear"]["Name"])),
+          PopupMenuItem(value: 'Last6Month', child: Text(TimeInterval["Last6Month"]["Name"])),
+          PopupMenuItem(value: 'Last3Month',child: Text(TimeInterval["Last3Month"]["Name"])),
+          PopupMenuItem(value: 'Last1Month',child: Text(TimeInterval["Last1Month"]["Name"])),
+          PopupMenuItem(value: 'Last1Week',child: Text(TimeInterval["Last1Week"]["Name"]))
+          ]),
+          onSelected: (String SelectedTime) {
+            setState(() {
+              timeInterval = SelectedTime;
+              StatisticsData = FilterTimeInterval(timeInterval);
+              CharDataNow = CreateChartDataNow(StatisticsData,property,property2);
+               _Graph = DrawGraphNow(CharDataNow: CharDataNow,Property: property,GraphType: 'Anlık',);
+            });
+          },)];
+  }
+
 
   DropdownButton<String> DropDownList() {
     return DropdownButton(
@@ -135,6 +188,7 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
             onChanged: (String? newValue) {
               setState(() {
                 dropDownItem = newValue!;
+                timeInterval = "allTime";
                 _changeGraphProperty(dropDownItem);
               });
               
@@ -143,7 +197,7 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
   }
 
   Padding _grafphbutton(String ButtonText, String ButtonOperation) => Padding(
-    padding: const EdgeInsets.all(5.0),
+    padding:  EdgeInsets.all(5.0),
     child: ElevatedButton(
       style : ElevatedButton.styleFrom(
         primary: const Color.fromARGB(255, 16, 139, 240),

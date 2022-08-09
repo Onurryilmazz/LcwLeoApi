@@ -59,6 +59,25 @@ Map DropDownProperty = {
   },
 };
 
+Map TimeInterval = {
+  "AllTime" : "Tüm Zamanlar",
+  "LastYear" : {
+    "TimeInterval":366,
+     "Name" : "Son 1 Yıl"},
+  "Last6Month" : {
+    "TimeInterval":183,
+     "Name" : "Son 6 Ay"},
+  "Last3Month" : {
+    "TimeInterval": 92,
+     "Name" : "Son 3 Ay"},
+  'Last1Month' : {
+    "TimeInterval":31,
+     "Name" : "Son 1 Ay"},
+  "Last1Week" : {
+    "TimeInterval": 7,
+     "Name" : "Son 1 Hafta"},
+};
+
 class ProjectText{
   String DefaultDropDownText = 'Backlog';
   String DefaultProperty = 'Backlog';
