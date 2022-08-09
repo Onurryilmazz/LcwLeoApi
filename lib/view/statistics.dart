@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:statistics_project/models/statistic_model.dart';
 import 'package:statistics_project/state/data/create_data.dart';
@@ -7,7 +9,9 @@ import 'package:statistics_project/state/graph_class.dart';
 
 import '../controller/controller.dart';
 import '../languages/languages.dart';
+import '../services/services.dart';
 import '../state/graph.dart';
+import 'package:http/http.dart' as http;
 
 class StatisticsAnalysis extends StatefulWidget {
   const StatisticsAnalysis({Key? key}) : super(key: key);
@@ -18,7 +22,7 @@ class StatisticsAnalysis extends StatefulWidget {
 
 class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
 
-  late final List<Statistics> fakeStatisticsData;
+  late final List<Statistics> fakeStatisticsData = [];
   late Widget? _Graph = const _WelcomeWidget();
   late List<ChartDataNow> CharDataNow = [];
   late List<ChartDataDay> CharDataDay = [];
@@ -28,9 +32,20 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
   String dropDownItem = ProjectText().DefaultDropDownText;
 
 
+
+  Future<void> fetchStudentItem() async {
+  var response = await Dio().get("https://mocki.io/v1/be763439-3c7c-4c72-b0dd-5c3d0efd1c18");
+  var data = response.data.map((e) => Statistics.fromJson(e)).toList();
+  for (var element in data) {
+    fakeStatisticsData.add(element);
+  }
+}
+
+
   @override
   void initState() {
-    fakeStatisticsData = CreateData().CreateDataValue();
+    // fakeStatisticsData = CreateData().CreateDataValue();
+    fetchStudentItem();
     Timer(const Duration(seconds:2),(){
           setState(() {
             CharDataNow = CreateChartDataNow(fakeStatisticsData,property,property2);
