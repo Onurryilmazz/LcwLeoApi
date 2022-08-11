@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:async';
 
 import 'package:dio/dio.dart';
@@ -22,9 +24,9 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
   List<Statistics> StatisticsData = [];
   List<Statistics> Data = [];
   late Widget? _Graph = const _WelcomeWidget();
-  late List<ChartDataNow> CharDataNow = [];
-  late List<ChartDataDay> CharDataDay = [];
-  late List<ChartDataMonth> CharDataMonth = [];
+  late List<ChartData> CharDataNow = [];
+  late List<ChartData> CharDataDay = [];
+  late List<ChartData> CharDataMonth = [];
   String property = ProjectText().DefaultProperty;
   String property2 = ProjectText().DefaultProperty2;
   String dropDownItem = ProjectText().DefaultDropDownText;
@@ -35,7 +37,7 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
 
 
   Future<void> fetchStudentItem() async {
-   var response = await Dio().get("https://mocki.io/v1/be763439-3c7c-4c72-b0dd-5c3d0efd1c18");
+  var response = await Dio().get("https://mocki.io/v1/be763439-3c7c-4c72-b0dd-5c3d0efd1c18");
   //var response = await Dio().get("https://192.168.68.106:44393/api/Mobile/Transfer/GetAllStatisticsFromMongo");
   var data = response.data.map((e) => Statistics.fromJson(e)).toList();
   for (var element in data) {
@@ -69,7 +71,7 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
     Timer(const Duration(seconds:2),(){
           setState(() {
             CharDataNow = CreateChartDataNow(StatisticsData,property,property2);
-            _Graph = DrawGraphNow(CharDataNow: CharDataNow,Property: property,GraphType:'Anlık');
+            _Graph = DrawGraph(ChartDataGraph: CharDataNow,Property: property,GraphType:'Anlık');
           });
     });
     super.initState();
@@ -79,19 +81,19 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
   void _changeGraph(String ButtonName){
         setState(() {
           if (ButtonName == ProjectButtonName().DayButton) {
-            CharDataDay = CreateChartDataDay(StatisticsData,property,property2);
+            CharDataDay = CreateChartData(StatisticsData,'Day',property,property2);
             graphType = 'Günlük';
-            _Graph = DrawGraphDaySum(CharDataDay: CharDataDay,Property:property,GraphType : graphType );
+            _Graph = DrawGraph(ChartDataGraph: CharDataDay,Property:property,GraphType : graphType );
           }
           else if (ButtonName == ProjectButtonName().NowButton){
             CharDataNow = CreateChartDataNow(StatisticsData,property,property2);
             graphType = 'Anlık';
-            _Graph = DrawGraphNow(CharDataNow: CharDataNow,Property:property,GraphType : graphType );
+            _Graph = DrawGraph(ChartDataGraph: CharDataNow,Property:property,GraphType : graphType );
           }
           else if(ButtonName == ProjectButtonName().MonthButton){
-            CharDataMonth = CreateChartDataMonth(StatisticsData,property,property2);
+            CharDataMonth = CreateChartData(StatisticsData,'Month',property,property2);
             graphType = 'Aylık';
-            _Graph = DrawGraphDaySumMonth(CharDataMonth: CharDataMonth,Property:property,GraphType : graphType );
+            _Graph = DrawGraph(ChartDataGraph: CharDataMonth,Property:property,GraphType : graphType );
           }
         });
   }
@@ -102,7 +104,7 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
           property2 = DropDownProperty[DropDownItem]['propertyChild'];
           StatisticsData = FilterTimeInterval(timeInterval);
           CharDataNow = CreateChartDataNow( StatisticsData,property,property2);
-          _Graph = DrawGraphNow(CharDataNow: CharDataNow,Property: property,GraphType: DefaultGraphType,);
+          _Graph = DrawGraph(ChartDataGraph: CharDataNow,Property: property,GraphType: DefaultGraphType,);
         });
   }
 
@@ -173,7 +175,7 @@ class _StatisticsAnalysisState extends State<StatisticsAnalysis> {
             timeInterval = selectedTime;
             StatisticsData = FilterTimeInterval(timeInterval);
             CharDataNow = CreateChartDataNow(StatisticsData,property,property2);
-             _Graph = DrawGraphNow(CharDataNow: CharDataNow,Property: property,GraphType: 'Anlık',);
+             _Graph = DrawGraph(ChartDataGraph: CharDataNow,Property: property,GraphType: 'Anlık',);
           });
         }
 

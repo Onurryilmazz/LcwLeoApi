@@ -1,47 +1,38 @@
+// ignore_for_file: non_constant_identifier_names
+
 import '../models/statistic_model.dart';
 import '../state/graph_class.dart';
 
-List<ChartDataNow> CreateChartDataNow(List<Statistics> statistics,String FatherFeature,[String childrenFeature = '']){
+List<ChartData> CreateChartDataNow(List<Statistics> statistics,String FatherFeature,[String childrenFeature = '']){
 
-  List<ChartDataNow> data = [];
+  List<ChartData> data = [];
   for (var element in statistics) {
     var elementJson = element.toJson();
     int count = FatherFeature!="Backlog"?
     childrenFeature==''?  elementJson[FatherFeature]:elementJson[FatherFeature][childrenFeature]:
     element.onaylananSiparis!.toplamOnaylananSiparisAdet! + element.toplamHazirlaniyor!.toplamHazirlaniyorAdet!;
-    var charData = ChartDataNow(count, element.dateTime??'');
+    String date = "${DateTime.parse(element.dateTime??'').day} / ${DateTime.parse(element.dateTime??'').month} / ${DateTime.parse(element.dateTime??'').year} - ${DateTime.parse(element.dateTime??'').hour} : ${DateTime.parse(element.dateTime??'').minute} ";
+    var charData = ChartData(count, date);
     data.add(charData);
   }
   return data;
 }
 
+List<ChartData> CreateChartData(List<Statistics> dataStatistic,String DataType,String FatherFeature, [String childrenFeature = '']){
 
-List<ChartDataDay> CreateChartDataDay(List<Statistics> dataStatistic,String FatherFeature,[String childrenFeature = '']){
+  List<ChartData> CharData = [];
 
-  List<ChartDataDay> CharDataDay = [];
+   var geciciData = DataType == "Day"? 
+   ProcessCountWithTime(dataStatistic,FatherFeature,ChildrenFeature: childrenFeature ).sumDayProcess():
+   ProcessCountWithTime(dataStatistic,FatherFeature,ChildrenFeature: childrenFeature ).sumMonthProcess();
 
-   var geciciData = ProcessCountWithTime(dataStatistic,FatherFeature,ChildrenFeature: childrenFeature ).sumDayProcess();
     geciciData.forEach((key, value) {
-      CharDataDay.add(
-        ChartDataDay(DateTime.parse(key), value)
+      CharData.add(
+        ChartData(value, key)
       );
     });
 
-    return CharDataDay;
-}
-
-List<ChartDataMonth> CreateChartDataMonth(List<Statistics> dataStatistic,String FatherFeature,[String childrenFeature = '']){
-
-  List<ChartDataMonth> CharDataMonth = [];
-
-   var geciciData = ProcessCountWithTime(dataStatistic,FatherFeature,ChildrenFeature: childrenFeature ).sumMonthProcess();
-    geciciData.forEach((key, value) {
-      CharDataMonth.add(
-        ChartDataMonth(key, value)
-      );
-    });
-
-    return CharDataMonth;
+    return CharData;
 }
 
 

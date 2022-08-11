@@ -1,17 +1,5 @@
-class ChartDataNow {
-  ChartDataNow(this.count, this.dateTime);
+class ChartData{
+  ChartData(this.count,this.date);
   final int count;
-  final String dateTime;
-}
-
-class ChartDataDay {
-  ChartDataDay(this.day, this.count);
-  final int count;
-  final DateTime day;
-}
-
-class ChartDataMonth {
-  ChartDataMonth(this.month, this.count);
-  final int count;
-  final String month;
+  final String date;
 }
